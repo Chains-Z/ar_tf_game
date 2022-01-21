@@ -1,24 +1,2 @@
-# ar_tf_game
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+# AR互动游戏
+自学镜像计划高级项目：[酷玩]广告-AR互动の进阶，开发中
