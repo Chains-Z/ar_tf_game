@@ -21,6 +21,7 @@ module.exports = {
     },
     devServer: {
         port : 8081,
+        disableHostCheck: true,
         proxy: {  //配置跨域
             '/api': {
                 target: 'http://localhost:8080',
