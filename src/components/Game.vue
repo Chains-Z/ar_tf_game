@@ -1,12 +1,21 @@
 <template>
 <div>
-<iframe src="/web-desktop/index.html"
-        height="640"
-        width="960"
-        ref="iframe"
-></iframe>
-<el-button @click="spaceDown">spaceDown</el-button>
-  <el-button @click="spaceUp">spaceUp</el-button>
+
+  <el-row>
+    <el-col>
+      <iframe src="/web-desktop/index.html"
+              height="640"
+              width="960"
+              ref="iframe"
+      ></iframe>
+    </el-col>
+  </el-row>
+<el-row>
+  <el-col :offset="6" :span="4">
+    <el-button @click="spaceDown">spaceDown</el-button>
+    <el-button @click="spaceUp">spaceUp</el-button>
+  </el-col>
+</el-row>
 </div>
 </template>
 
