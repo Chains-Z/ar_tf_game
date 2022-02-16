@@ -38,15 +38,14 @@
 <script>
     System.import('./index.js').catch(function(err) { console.error(err); })
     window.addEventListener('message',e => {
+        let canvas = document.getElementById('GameCanvas')
         if(e.data === 'spaceDown'){
-            let mockSpaceDownEvent = new KeyboardEvent('keydown',{key:" "})
-            console.log("keydown")
-            document.dispatchEvent(mockSpaceDownEvent)
+            let mockSpaceDownEvent = new KeyboardEvent('keydown',{code:"Space"})
+            canvas.dispatchEvent(mockSpaceDownEvent)
         }
         else {
-            let mockSpaceUpEvent = new KeyboardEvent('keyup',{key:" "})
-            console.log("keyUp")
-            document.dispatchEvent(mockSpaceUpEvent)
+            let mockSpaceUpEvent = new KeyboardEvent('keyup',{code:"Space"})
+            canvas.dispatchEvent(mockSpaceUpEvent)
         }
     })
 </script>
