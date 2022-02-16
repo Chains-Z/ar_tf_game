@@ -3,7 +3,8 @@
 <!--    游戏部分-->
     <el-row>
       <el-col>
-        <iframe src="/web-desktop/index.html"
+        <iframe
+            src="web-desktop/index.html"
                 height="640"
                 width="960"
                 ref="iframe"
@@ -127,6 +128,8 @@ let webcam
 let isPredicting = false
 const CONTROLS = ['charge', 'jump']
 let lastPredictId = 1
+//用于固定预测频率为0.1s/次
+let fps = 144
 const controllerDataset = new ControllerDataset(NUM_CLASSES)
 export default {
   name: "Tf_Train",
@@ -271,7 +274,10 @@ export default {
         img.dispose();
 
         this.predictClass(classId);
-        await tf.nextFrame();
+        //预测频率与刷新率相关，固定为0.1s
+        for (let i = 0; i < Math.floor(fps / 10); i++) {
+          await tf.nextFrame();
+        }
       }
     },
     predictClass(classId) {
