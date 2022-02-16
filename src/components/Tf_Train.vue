@@ -1,5 +1,16 @@
 <template>
   <div>
+<!--    游戏部分-->
+    <el-row>
+      <el-col>
+        <iframe src="/web-desktop/index.html"
+                height="640"
+                width="960"
+                ref="iframe"
+        ></iframe>
+      </el-col>
+    </el-row>
+<!--    tf训练部分-->
     <div ref="status">Loading mobilenet...</div>
     <el-row justify="center">
       <el-col :span="6">
@@ -112,6 +123,10 @@ import {ControllerDataset} from '@/assets/controller_dataset';
 const NUM_CLASSES = 2//跳和蓄力
 let truncatedMobileNet
 let model
+let webcam
+let isPredicting = false
+const CONTROLS = ['charge', 'jump']
+let lastPredictId = 1
 const controllerDataset = new ControllerDataset(NUM_CLASSES)
 export default {
   name: "Tf_Train",
@@ -124,18 +139,20 @@ export default {
       train_status: "训练模型",
       charge_examples: 0,
       jump_examples: 0,
-      CONTROLS: ['charge', 'jump'],
-      webcam: null,
-
-      isPredicting: false
     }
   },
   mounted() {
     this.init()
   },
   methods: {
+    spaceDown() {
+      this.$refs.iframe.contentWindow.postMessage('spaceDown', '*')
+    },
+    spaceUp() {
+      this.$refs.iframe.contentWindow.postMessage('spaceUp', '*')
+    },
     async addExamples(label) {
-      const count_name = this.CONTROLS[label] + '_examples'
+      const count_name = CONTROLS[label] + '_examples'
       this[count_name]++
       let img = await this.getImage();
       controllerDataset.addExample(truncatedMobileNet.predict(img), label);
@@ -144,7 +161,7 @@ export default {
       img.dispose();
     },
     drawThumb(img, label) {
-      const thumbCanvas = this.$refs[this.CONTROLS[label] + '-thumb']
+      const thumbCanvas = this.$refs[CONTROLS[label] + '-thumb']
       this.draw(img, thumbCanvas)
     },
     draw(image, canvas) {
@@ -235,7 +252,7 @@ export default {
       });
     },
     async predict() {
-      while (this.isPredicting) {
+      while (isPredicting) {
         // Capture the frame from the webcam.
         const img = await this.getImage();
 
@@ -258,23 +275,28 @@ export default {
       }
     },
     predictClass(classId) {
-      //TODO:add game button
-      document.body.setAttribute('data-active', this.CONTROLS[classId])
+      if(classId !== lastPredictId){
+        lastPredictId = classId
+        if(classId === 0)
+          this.spaceDown()
+        else
+          this.spaceUp()
+      }
+      document.body.setAttribute('data-active', CONTROLS[classId])
     },
     async trainHandler() {
       this.train_status = 'Training...';
       await tf.nextFrame();
       await tf.nextFrame();
-      this.isPredicting = false;
+      isPredicting = false;
       await this.train();
     },
     async playHandler() {
-      //TODO:start the game
-      this.isPredicting = true;
+      isPredicting = true;
       await this.predict();
     },
     async getImage() {
-      const img = await this.webcam.capture();
+      const img = await webcam.capture();
       const processedImg =
           tf.tidy(() => img.expandDims(0).toFloat().div(127).sub(1));
       img.dispose();
@@ -282,7 +304,7 @@ export default {
     },
     async init() {
       try {
-        this.webcam = await tfd.webcam(document.getElementById('webcam'));
+        webcam = await tfd.webcam(document.getElementById('webcam'));
       } catch (e) {
         console.log(e);
       }
@@ -292,7 +314,7 @@ export default {
       // Warm up the model. This uploads weights to the GPU and compiles the WebGL
       // programs so the first time we collect data from the webcam it will be
       // quick.
-      const screenShot = await this.webcam.capture();
+      const screenShot = await webcam.capture();
       truncatedMobileNet.predict(screenShot.expandDims(0));
       screenShot.dispose();
     }
@@ -323,12 +345,13 @@ export default {
 }
 
 #webcam {
-  /*height: 224px;*/
+  /*height: 160px;*/
   transform: scaleX(-1);
 }
 
 .thumb {
-  height: 190px;
+  /*height: 66px;*/
+  height: 160px;
   transform: scaleX(-1);
 }
 
